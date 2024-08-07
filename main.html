@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Répertoire de Mèmes</title>
+    <style>
+        :root {
+            --bg-color: #e0e5ec;
+            --shadow-color: #a3b1c6;
+            --highlight-color: #ffffff;
+            --text-color: #1e1e1e;
+            --btn-bg-color: #007aff;
+            --btn-text-color: white;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+            overflow-x: hidden;
+        }
+        body.dark-mode {
+            --bg-color: #1e1e1e;
+            --shadow-color: #121212;
+            --highlight-color: #2c2c2c;
+            --text-color: #e0e5ec;
+            --btn-bg-color: #0056b3;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .search-container {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        #searchInput {
+            width: 100%;
+            padding: 10px 15px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 20px;
+            background-color: var(--highlight-color);
+            color: var(--text-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--btn-bg-color);
+            font-size: 1.2rem;
+        }
+        .category-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .category-btn {
+            background-color: var(--btn-bg-color);
+            color: var(--btn-text-color);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+        .category-btn:hover, .category-btn.active {
+            opacity: 0.9;
+        }
+        .meme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .meme-card {
+            background-color: var(--bg-color);
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 
+                4px 4px 8px var(--shadow-color),
+                -4px -4px 8px var(--highlight-color);
+        }
+        .meme-image, .meme-video {
+            width: 100%;
+            height: auto;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .meme-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .download-btn {
+            background-color: var(--btn-bg-color);
+            color: var(--btn-text-color);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+        .download-btn:hover {
+            opacity: 0.9;
+        }
+        #theme-toggle {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--btn-bg-color);
+            color: var(--btn-text-color);
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #loadMoreBtn {
+            margin-top: 15px;
+            padding: 8px 15px;
+            background-color: var(--btn-bg-color);
+            color: var(--btn-text-color);
+            border: none;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .hidden-tags {
+            display: none;
+        }
+        footer {
+            margin-top: auto;
+            padding: 15px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        footer a {
+            color: var(--btn-bg-color);
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 600px) {
+            .meme-grid {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .meme-card {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="theme-toggle">🌙</button>
+    <h1>Le répertoire à meme </h1>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Rechercher un mème...">
+        <span class="search-icon">🔍</span>
+    </div>
+    <div class="category-buttons">
+        <button class="category-btn active" data-category="all">Tous</button>
+        <button class="category-btn" data-category="photo">Photos</button>
+        <button class="category-btn" data-category="video">Vidéos</button>
+    </div>
+    <div class="meme-grid" id="memeGrid"></div>
+    <button id="loadMoreBtn">En charger plus</button>
+    
+    <footer>
+        Créé par jey, pour toute réclamation merci de rejoindre le <a href="https://discord.gg/votre-lien-discord" target="_blank">discord</a>
+    </footer>
+
+    <script>
+        // Remplacez 'votre-cloud-name' par votre vrai nom de cloud Cloudinary
+        const cloudName = 'ddjtzvds';
+
+        const memes = [
+            {
+                name: "Il en avait des choses à dire",
+                type: "photo",
+                src: `https://res.cloudinary.com/ddjtzxvds/image/upload/v1722998988/20220809_124014_x1zd0h.jpg`,
+                downloadLink: `https://res.cloudinary.com/ddjtzxvds/image/upload/v1722998988/20220809_124014_x1zd0h.jpg`,
+                tags: ["débite", "debite", "ohlolo"]
+            },
+            {
+                name: "Asminotaur pet",
+                type: "video",
+                src: `https://res.cloudinary.com/ddjtzxvds/video/upload/v1722999440/ssstwitter.com_1662914892290_cwrbc5.mp4`,
+                downloadLink: `https://res.cloudinary.com/ddjtzxvds/video/upload/v1722999440/ssstwitter.com_1662914892290_cwrbc5.mp4`,
+                tags: ["asterion", "prout", "asmr"]
+            },
+            {
+                name: "Descendez non",
+                type: "photo",
+                src: `https://res.cloudinary.com/ddjtzxvds/image/upload/v1722999725/20220820_214556_rttcbm.jpg`,
+                downloadLink: `https://res.cloudinary.com/ddjtzxvds/image/upload/v1722999725/20220820_214556_rttcbm.jpg`,
+                tags: ["2h ils sont la ils veulent pas bouger", "descender non", "pq ils sont en haut comme ça"]
+            },
+        ];
+
+        const memeGrid = document.getElementById('memeGrid');
+        const searchInput = document.getElementById('searchInput');
+        const categoryButtons = document.querySelectorAll('.category-btn');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        let currentPage = 1;
+        const itemsPerPage = 12;
+
+        function displayMemes(memesToShow, append = false) {
+            if (!append) {
+                memeGrid.innerHTML = '';
+            }
+            memesToShow.forEach(meme => {
+                const memeCard = document.createElement('div');
+                memeCard.className = 'meme-card';
+                memeCard.innerHTML = `
+                    ${meme.type === 'photo' 
+                        ? `<img src="${meme.src}" alt="${meme.name}" class="meme-image">`
+                        : `<video src="${meme.src}" class="meme-video" controls></video>`
+                    }
+                    <div class="meme-title">${meme.name}</div>
+                    <div class="hidden-tags">${meme.tags.join(' ')}</div>
+                    <button class="download-btn" onclick="downloadMeme('${meme.downloadLink}', '${meme.name}', '${meme.type}')">Télécharger</button>
+                `;
+                memeGrid.appendChild(memeCard);
+            });
+        }
+
+        function downloadMeme(url, name, type) {
+            const extension = type === 'photo' ? 'jpg' : 'mp4';
+            const filename = `${name}.${extension}`;
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.target = '_blank';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function filterMemes() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const activeCategory = document.querySelector('.category-btn.active').dataset.category;
+            const filteredMemes = memes.filter(meme => {
+                const nameMatch = meme.name.toLowerCase().includes(searchTerm);
+                const tagMatch = meme.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+                const categoryMatch = activeCategory === 'all' || meme.type === activeCategory;
+                return (nameMatch || tagMatch) && categoryMatch;
+            });
+            currentPage = 1;
+            displayMemes(filteredMemes.slice(0, itemsPerPage));
+            updateLoadMoreButton(filteredMemes.length);
+        }
+
+        function loadMore() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const activeCategory = document.querySelector('.category-btn.active').dataset.category;
+            const filteredMemes = memes.filter(meme => {
+                const nameMatch = meme.name.toLowerCase().includes(searchTerm);
+                const tagMatch = meme.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+                const categoryMatch = activeCategory === 'all' || meme.type === activeCategory;
+                return (nameMatch || tagMatch) && categoryMatch;
+            });
+            const nextItems = filteredMemes.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
+            displayMemes(nextItems, true);
+            currentPage++;
+            updateLoadMoreButton(filteredMemes.length);
+        }
+
+        function updateLoadMoreButton(totalFilteredItems) {
+            const remainingItems = totalFilteredItems - currentPage * itemsPerPage;
+            loadMoreBtn.style.display = remainingItems > 0 ? 'block' : 'none';
+        }
+
+        function toggleDarkMode() {
+            body.classList.toggle('dark-mode');
+            const isDarkMode = body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
+        function loadDarkModePreference() {
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                body.classList.add('dark-mode');
+                themeToggle.textContent = '☀️';
+            }
+        }
+
+        searchInput.addEventListener('input', filterMemes);
+
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                categoryButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                filterMemes();
+            });
+        });
+
+        loadMoreBtn.addEventListener('click', loadMore);
+        themeToggle.addEventListener('click', toggleDarkMode);
+
+        // Initial setup
+        loadDarkModePreference();
+        displayMemes(memes.slice(0, itemsPerPage));
+        updateLoadMoreButton(memes.length);
+    </script>
+</body>
+</html>
